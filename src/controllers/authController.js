@@ -5,10 +5,16 @@ const db = require('../db/db');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
 const JWT_EXPIRES_IN = '7d';
 
+const generateToken = (user) => {
+  return jwt.sign(
+    { userId: user.id, role: user.role },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
+  );
+};
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
-
 
   if (!name || !email || !password) {
     return res.status(400).json({
@@ -18,6 +24,7 @@ const register = async (req, res) => {
   }
 
   try {
+
     const existing = await db.query(
       'SELECT id FROM users WHERE email = $1',
       [email]
@@ -30,7 +37,9 @@ const register = async (req, res) => {
       });
     }
 
+
     const hashedPassword = await bcrypt.hash(password, 10);
+
 
     const result = await db.query(
       `INSERT INTO users (name, email, password_hash)
@@ -41,11 +50,7 @@ const register = async (req, res) => {
 
     const user = result.rows[0];
 
-    const token = jwt.sign(
-      { userId: user.id, role: user.role },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    const token = generateToken(user);
 
     return res.status(201).json({
       status: 'ok',
@@ -98,13 +103,10 @@ const login = async (req, res) => {
       });
     }
 
+
     delete user.password_hash;
 
-    const token = jwt.sign(
-      { userId: user.id, role: user.role },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    const token = generateToken(user);
 
     return res.json({
       status: 'ok',
@@ -122,32 +124,35 @@ const login = async (req, res) => {
   }
 };
 
-const me = async (req,res)=>{
-    try{
-        const result = await db.query(
-            `SELECT idm name, email, role, createdf_at
-            FROM users
-            WHERE id = $1`,
-            [req.user.userId]
-        );
-        if (result.rowCount === 0) {
-            return res.status(404).json({
-                status:'error',
-                message:'User not found',
-            });
-        }
-        return res.json({
-            status:'ok',
-            data: result.rows[0],
-        });
-    } catch (error) {
-        console.error('❌ Me error:', error.message);
-        res.status(500).json({
-            status:'ok',
-            message:'Failed to get profile',
-        });
+const me = async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT id, name, email, role, created_at
+       FROM users
+       WHERE id = $1`,
+      [req.user.userId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found',
+      });
     }
-}
+
+    return res.json({
+      status: 'ok',
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error('❌ Me error:', error.message);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Failed to get profile',
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
