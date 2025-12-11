@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./db/db');
 const productRoutes = require('./routes/productRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
@@ -54,5 +55,9 @@ app.get('/api/users', async (req, res) => {
 
 
 app.use('/api/products', productRoutes);
+
+app.use('/api/auth', authRoutes);
+
+app.use('/api/auth', authRoutes);
 
 module.exports = app;
