@@ -5,6 +5,8 @@ const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const cartRoutes = require('./routes/cartRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+
 
 const app = express();
 
@@ -58,7 +60,8 @@ app.get('/api/users', async (req, res) => {
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
-
 app.use('/api/cart', cartRoutes);
+app.use('/api/categories', categoryRoutes);
+
 
 module.exports = app;
