@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/client';
 
-const LoginPage = () => {
-  const { login } = useAuth();
+const RegisterPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // احتمال نستعملو لو حبيت نسجّل ونسجّل دخول مباشرة
 
   const [form, setForm] = useState({
+    name: '',
     email: '',
     password: '',
   });
@@ -15,9 +17,10 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
@@ -27,14 +30,18 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      await login(form.email, form.password);
+      const res = await api.post('/auth/register', form);
+
+      await login(form.email, form.password); 
+
       navigate('/');
+
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('Register error:', err);
       const msg =
         err.response?.data?.message ||
         err.response?.data?.error ||
-        'Login failed';
+        'Register failed';
       setError(msg);
     } finally {
       setLoading(false);
@@ -43,9 +50,24 @@ const LoginPage = () => {
 
   return (
     <div className="page" style={{ maxWidth: 400, margin: '40px auto' }}>
-      <h1 style={{ marginBottom: 16 }}>Login</h1>
+      <h1 style={{ marginBottom: 16 }}>Register</h1>
 
-      <form onSubmit={handleSubmit} className="card" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <form
+        onSubmit={handleSubmit}
+        className="card"
+        style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
+      >
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          Name
+          <input
+            type="text"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
+        </label>
+
         <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           Email
           <input
@@ -74,16 +96,17 @@ const LoginPage = () => {
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ marginTop: 8 }}
-        >
-          {loading ? 'Logging in...' : 'Login'}
+        <button type="submit" disabled={loading} style={{ marginTop: 8 }}>
+          {loading ? 'Creating account...' : 'Register'}
         </button>
       </form>
+
+      <p style={{ marginTop: 12, fontSize: 14 }}>
+        Already have an account?{' '}
+        <Link to="/login">Login</Link>
+      </p>
     </div>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
