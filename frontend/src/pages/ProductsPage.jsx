@@ -188,7 +188,7 @@ const ProductsPage = () => {
           marginBottom: 24,
         }}
       >
-        <h1>Ecommerce</h1>
+        <h1>Ecommerce-FullStack</h1>
 
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {user ? (
