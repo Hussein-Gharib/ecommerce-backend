@@ -65,6 +65,7 @@ const ProductsPage = () => {
 
   return (
     <div style={{ padding: 20 }}>
+      {/* HEADER */}
       <header
         style={{
           display: 'flex',
@@ -75,11 +76,24 @@ const ProductsPage = () => {
       >
         <h1>Ecommerce-FullStack</h1>
 
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {user ? (
             <>
-              <span>Hi, {user.name} {user.role === 'admin' && '(admin)'}</span>
-              <button onClick={() => navigate('/cart')}>Cart</button>
+              <span>
+                Hi, {user.name} {user.role === 'admin' && '(admin)'}
+              </span>
+
+              {/* Admin buttons */}
+              {user.role === 'admin' && (
+                <>
+                  <button onClick={() => navigate('/admin/products/new')}>
+                    ➕ Add Product
+                  </button>
+
+                  <button onClick={() => navigate('/cart')}>Cart</button>
+                </>
+              )}
+
               <button onClick={logout}>Logout</button>
             </>
           ) : (
@@ -91,8 +105,11 @@ const ProductsPage = () => {
         </div>
       </header>
 
+      {/* Messages */}
       {cartMsg && <p style={{ color: 'lightgreen' }}>{cartMsg}</p>}
       {cartError && <p style={{ color: 'crimson' }}>{cartError}</p>}
+
+      {/* PRODUCTS GRID */}
       <div
         style={{
           display: 'grid',
@@ -111,7 +128,6 @@ const ProductsPage = () => {
                 'linear-gradient(180deg, rgba(17,24,39,0.8), rgba(0,0,0,0.9))',
               boxShadow:
                 '0 0 0 1px rgba(255,255,255,0.05), 0 20px 40px rgba(0,0,0,0.6)',
-              transition: '0.25s',
             }}
           >
             <h2 style={{ marginTop: 0 }}>{p.name}</h2>
@@ -142,37 +158,34 @@ const ProductsPage = () => {
             <h3>{p.price} $</h3>
             <p>Stock: {p.stock}</p>
 
-            {/* 🔽 Buttons (smaller + inside border) */}
-            <div
-              style={{
-                display: 'flex',
-                gap: 10,
-                marginTop: 16,
-                paddingBottom: 6,
-              }}
-            >
-              <button
-                onClick={() => handleAddToCart(p.id)}
-                disabled={p.stock === 0}
-                style={{
-                  height: 36,
-                  padding: '0 14px',
-                  borderRadius: 9999,
-                  fontSize: 13,
-                  fontWeight: 700,
-                  border: '1px solid rgba(99,102,241,0.4)',
-                  background:
-                    p.stock === 0
-                      ? 'rgba(99,102,241,0.3)'
-                      : 'rgba(99,102,241,0.75)',
-                  color: 'white',
-                  cursor: p.stock === 0 ? 'not-allowed' : 'pointer',
-                }}
-              >
-                Add to cart
-              </button>
+            {/* Buttons */}
+            <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+              {/* Add to cart (not admin) */}
+              {user?.role !== 'admin' && (
+                <button
+                  onClick={() => handleAddToCart(p.id)}
+                  disabled={p.stock === 0}
+                  style={{
+                    height: 36,
+                    padding: '0 14px',
+                    borderRadius: 9999,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    border: '1px solid rgba(99,102,241,0.4)',
+                    background:
+                      p.stock === 0
+                        ? 'rgba(99,102,241,0.3)'
+                        : 'rgba(99,102,241,0.75)',
+                    color: 'white',
+                    cursor: p.stock === 0 ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  Add to cart
+                </button>
+              )}
 
-              {user && user.role === 'admin' && (
+              {/* Admin buttons */}
+              {user?.role === 'admin' && (
                 <>
                   <button
                     onClick={() => navigate(`/admin/products/${p.id}/edit`)}
